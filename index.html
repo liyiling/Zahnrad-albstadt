@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Zahnrad Verwaltung</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        .main-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 1200px; /* 添加最大宽度限制 */
+            margin: 0 auto; /* 水平居中 */
+        }
+
+        .card {
+            width: 100%;
+            padding: 1.5rem; /* 增加内边距 */
+            background-color: white; /* 添加背景色 */
+            border: 1px solid #dee2e6; /* 调整边框颜色 */
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); /* 调整阴影 */
+        }
+
+        /* 基础样式 */
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px; /* 改为 padding 保持安全边距 */
+            background-color: #f8f9fa; /* 添加背景色 */
+            min-height: 100vh;
+        }
+
+        nav {
+            background-color: #007BFF;
+            padding: 12px;
+            margin: -20px -20px 20px -20px; /* 抵消 body 的 padding */
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav button {
+            background-color: white;
+            color: #007BFF;
+            border: none;
+            padding: 10px 15px;
+            margin-right: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        nav button:hover {
+            background-color: #e0e0e0;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        .orderItem {
+            margin-top: 10px;
+        }
+
+        h2, h3 {
+            color: #007BFF;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-family: Arial, sans-serif;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            padding: 12px;
+            text-align: left;
+        }
+
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        #orderForm {
+            max-width: 400px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 6px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<!-- ✅ 导航栏 -->
+<nav>
+    <button onclick="showView('zahnradView')">ZahnradTyp</button>
+    <button onclick="showView('auftragView')">Auftrag</button>
+</nav>
+<!-- ✅ 齿轮视图 -->
+<div id="zahnradView" class="view active">
+    <!-- 添加布局器 -->
+    <div class="main-section">
+        <!-- 添加齿轮表单 -->
+        <div class="card">
+            <h3>Neu Zahnradtyp hinzufügen</h3>
+            <form id="addForm">
+                TypBezeichnung: <input type="text" id="typbezeichnung" required><br>
+                Durchmesser: <input type="number" id="durchmesser" required><br>
+                VorgabeProduktionszeit: <input type="number" id="vorgabeproduktionszeit" required><br>
+                <button type="submit">add</button>
+            </form>
+            <p id="addMessage"></p>
+        </div>
+        <!-- 查询齿轮按钮和显示区域 -->
+        <div class="card">
+            <h3>alle Zahnräder</h3>
+            <button onclick="fetchZahnrads()">search</button>
+            <!-- <ul id="zahnradsList"></ul> -->
+
+            <table border="1" id="zahnradsTable">
+                <thead>
+                <tr>
+                    <th>ZahnradID</th>
+                    <th>ZahnradType</th>
+                    <th>Durchmesser(cm)</th>
+                    <th>VorgabeProduktionszeit(Min.)</th>
+                </tr>
+                </thead>
+                <tbody id="zahnradsBody">
+                <!-- 表格内容将通过JS动态插入 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ 订单视图 -->
+<div id="auftragView" class="view">
+    <!-- 添加订单表单 -->
+    <h3>Neuen Auftrag hinzufügen</h3>
+    <form id="orderForm">
+        <div class="form-group">
+            <label for="kundeid">Kunde :</label>
+            <select id="kundeid" name="kundeid" required>
+                <option value="">Bitte Kunde auswählen</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="bestelldatum">Bestelldatum:</label>
+            <input type="date" id="bestelldatum" required>
+        </div>
+
+        <h4>Welche und wie viele Zahnräder in disem Auftrag:</h4>
+        <div id="orderItemsContainer">
+            <div class="orderItem">
+                <div class="form-group">
+                    <label>ZahnradTyp:</label>
+                    <select class="zahnradtypid" required>
+                        <option value="">Bitte ZahnradTyp wählen</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Menge:</label>
+                    <input type="number" class="menge" min="1" required> <!-- 改用class -->
+                </div>
+            </div>
+        </div>
+
+        <button type="button" onclick="addOrderItem()">+ weiteres Zahnrad hinzufügen</button>
+        <br><br>
+        <button type="submit">Auftrag hinzufügen</button>
+        <p id="orderMessage"></p>
+    </form>
+
+    <!-- 查询订单按钮和显示区域 -->
+    <h3>alle Aufträge</h3>
+    <button onclick="fetchOrders()">search</button>
+    <table border="1" id="ordersTable">
+        <thead>
+        <tr>
+            <th>AuftragID</th>
+            <th>Kunde</th>
+            <th>Bestelldatum</th>
+            <th>Positionen</th>
+        </tr>
+        </thead>
+        <tbody id="ordersBody">
+        <!-- JS 会插入数据 -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const backendURL = "http://127.0.0.1:5000";
+
+    // ✅ 页面视图切换功能
+    function showView(viewId) {
+        document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+        document.getElementById(viewId).classList.add("active");
+    }
+
+    // Zahnrad hinzufügen
+    document.getElementById("addForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const typbezeichnung = document.getElementById("typbezeichnung").value;
+        const durchmesser = document.getElementById("durchmesser").value;
+        const vorgabeproduktionszeit = document.getElementById("vorgabeproduktionszeit").value;
+
+        const response = await fetch(`${backendURL}/zahnrads`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({typbezeichnung, durchmesser, vorgabeproduktionszeit})
+        });
+
+        const result = await response.json();
+        document.getElementById("addMessage").innerText = result.message || result.error;
+    });
+
+    // Zahnrad zeigen
+    function fetchZahnrads() {
+        fetch("http://127.0.0.1:5000/zahnrads")
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.getElementById("zahnradsBody");
+                tableBody.innerHTML = "";  // 清空原有内容
+
+                data.forEach(zahnrad => {
+                    const row = document.createElement("tr");
+
+                    row.innerHTML = `
+            <td>${zahnrad.zahnradtypid}</td>
+            <td>${zahnrad.typbezeichnung}</td>
+            <td>${zahnrad.durchmesser}</td>
+            <td>${zahnrad.vorgabeproduktionszeit}</td>
+          `;
+
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error("Error fetching data:", error));
+    }
+
+
+    // 添加订单项输入框
+    function addOrderItem() {
+        const container = document.getElementById("orderItemsContainer");
+        const div = document.createElement("div");
+        div.className = "orderItem";
+        div.innerHTML = `
+                <label>Zahnrad auswählen:</label>
+                <select class="zahnradtypid" required>
+                    <option value="">Bitte ZahnradTyp wählen</option>
+                </select>
+                Menge: <input type="number" class="menge" required>
+            `;
+        container.appendChild(div);
+        fetchZahnradTypen();  // 为新增 select 填充选项
+    }
+
+    // 提交订单
+    document.getElementById("orderForm").addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const kundeid = document.getElementById("kundeid").value;
+        const bestelldatum = document.getElementById("bestelldatum").value;
+
+        const items = [];
+        document.querySelectorAll(".orderItem").forEach(itemDiv => {
+            const zahnradtypid = itemDiv.querySelector(".zahnradtypid").value;
+            const menge = itemDiv.querySelector(".menge").value;
+            items.push({zahnradtypid: parseInt(zahnradtypid), menge: parseInt(menge)});
+        });
+
+        const response = await fetch(`${backendURL}/orders`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({kundeid: parseInt(kundeid), bestelldatum, items})
+        });
+
+        const result = await response.json();
+        document.getElementById("orderMessage").innerText = result.message || result.error;
+    });
+
+    // 查询订单及明细
+    async function fetchOrders() {
+        const response = await fetch(`${backendURL}/orders`);
+        const orders = await response.json();
+
+        const tableBody = document.getElementById("ordersBody");
+        tableBody.innerHTML = "";  // 清空旧内容
+
+        orders.forEach(order => {
+            const row = document.createElement("tr");
+
+            // 构建订单项字符串
+            const itemsText = order.items.map(i =>
+                `Typ ${i.zahnradtypid}: ${i.menge} Stück`).join("<br>");
+
+            row.innerHTML = `
+            <td>${order.auftragid}</td>
+            <td>${order.kunde}</td>
+            <td>${order.bestelldatum}</td>
+            <td>${itemsText}</td>
+        `;
+
+            tableBody.appendChild(row);
+        });
+    }
+
+    // 拉取客户数据并填充下拉框
+    async function fetchKunden() {
+        const response = await fetch(`${backendURL}/kunden`);
+        const kunden = await response.json();
+        const select = document.getElementById("kundeid");
+        select.innerHTML = '<option value="">Bitte auswählen KundeID</option>';  // 清空并设置默认项
+        kunden.forEach(kunde => {
+            const option = document.createElement("option");
+            option.value = kunde.kundeid;
+            option.textContent = `${kunde.kundeid} - ${kunde.name}`;  // 显示格式
+            select.appendChild(option);
+        });
+    }
+
+    // 页面加载时拉取客户数据
+    window.onload = fetchKunden;
+
+    //获取齿轮的类型Id，类型名称
+    async function fetchZahnradTypen() {
+        const response = await fetch(`${backendURL}/zahnrads`);
+        const typen = await response.json();
+
+        // 填充所有 .zahnradtypid 下拉框
+        document.querySelectorAll(".zahnradtypid").forEach(select => {
+            select.innerHTML = '<option value="">Bitte ZahnradTyp wählen</option>';  // 重置选项
+            typen.forEach(t => {
+                const option = document.createElement("option");
+                option.value = t.zahnradtypid;
+                option.textContent = `${t.zahnradtypid} - ${t.typbezeichnung}`;
+                select.appendChild(option);
+            });
+        });
+    }
+
+    window.onload = async function () {
+        await fetchKunden();
+        await fetchZahnradTypen();  // 加载齿轮下拉选项
+    };
+
+</script>
+</body>
+</html>
