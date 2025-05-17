@@ -6,6 +6,7 @@ Beschreibung der Fertigungsdomäne der „Zahnrad AG“
 
 Die Zahnrad AG stellt unterschiedliche Typen von Zahnrädern her. Jeder Typ hat eine interne Bezeichnung und unter anderem als Erkennungsmerkmal einen bestimmten Durchmesser.Die Zahnräder verkauft die Firma an verschiedene Kunden. Die Kunden ordern in der Regel nicht nur ein Zahnrad, sondern mehrere Zahnräder verschiedener Typen.
 齿轮股份公司（Zahnrad AG）生产不同类型的齿轮。每种类型都有一个内部名称，并以某一特定直径等特征作为识别标志。公司将齿轮销售给不同的客户。客户通常不会只订购一个齿轮，而是订购多个不同类型的齿轮。
+
 Zur Fertigung der Zahnräder hat die Zahnrad AG einen Maschinenpark. Die Maschinen sind unterschiedlich alt und von verschiedenen Herstellern. Dabei ist zu beachten, dass nicht jeder Zahnradtyp auf jeder Maschine hergestellt werden kann. 
 为了生产这些齿轮，齿轮股份公司配备了一套机器设备。机器的使用年限不同，来自不同的制造商。需要注意的是，并非每种齿轮类型都能在每台机器上生产。
 
@@ -22,6 +23,7 @@ Der Auftraggeber stellt einen Beispiel-Code in Python zur Verfügung, welcher al
 
 Es ist eine RESTful API zu erstellen, mit welcher die einzelnen Datenbankabfragen durchgeführt werden können.
 需要创建一个 RESTful API，通过该接口可以执行各项数据库查询操作。
+
 • Dabei sollen GET-Endpoints zur Abfrage von Daten und POST-Endpoints zum Einfügen von Daten genutzt werden. 应使用 GET 端点 来查询数据，使用 POST 端点 来插入数据。
 • Die API soll die Daten im JSON-Format annehmen und ausgeben. API 应以 JSON 格式 接收和返回数据。
 
