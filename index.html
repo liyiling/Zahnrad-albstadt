@@ -9,9 +9,10 @@
             margin: 0;
             padding: 0;
         }
+
         .main-section {
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             gap: 20px;
             max-width: 1200px; /* 添加最大宽度限制 */
             margin: 0 auto; /* 水平居中 */
@@ -24,6 +25,14 @@
             border: 1px solid #dee2e6; /* 调整边框颜色 */
             border-radius: 8px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); /* 调整阴影 */
+        }
+
+        .card:nth-child(1) {
+            flex: 1;
+        }
+
+        .card:nth-child(2) {
+            flex: 2;
         }
 
         /* 基础样式 */
@@ -71,9 +80,12 @@
 
         h2, h3 {
             color: #007BFF;
+            font-size: 1.2rem; /* 24px */
+            font-weight: bold;
+            padding-bottom: 12px;
         }
-
         table {
+            width: 100%;
             border-collapse: collapse;
             margin: 20px 0;
             font-family: Arial, sans-serif;
@@ -94,16 +106,30 @@
             background-color: #f5f5f5;
         }
 
-        #orderForm {
-            max-width: 400px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            background-color: #f9f9f9;
-        }
-
         .form-group {
             margin-bottom: 12px;
+        }
+
+        /* 横向布局样式 */
+        .form-row {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end; /* 底部对齐 */
+        }
+
+        /* 左边 ZahnradTyp 占 2/3 */
+        .form-row .form-group:nth-child(1) {
+            flex: 2; /* 2份 */
+        }
+
+        /* 右边 Menge 占 1/3 */
+        .form-row .form-group:nth-child(2) {
+            flex: 1; /* 1份 */
+        }
+
+        /* 可选：防止输入框挤压 */
+        .form-row .form-group {
+            min-width: 0; /* 关键：允许内容收缩 */
         }
 
         label {
@@ -119,17 +145,40 @@
         }
 
         button {
-            background-color: #007BFF;
-            color: white;
-            border: none;
             padding: 8px 16px;
+            border: none;
             font-weight: bold;
             border-radius: 5px;
             cursor: pointer;
+            transition: background-color 0.2s;
         }
 
-        button:hover {
+        button.primary-btn {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        button.primary-btn:hover {
             background-color: #0056b3;
+        }
+
+        button.secondary-btn {
+            background-color: white;
+            color: #007BFF; /* 字体颜色保持蓝色 */
+            border: 1px solid #007BFF;
+            font-weight: normal; /* 覆盖默认加粗样式 */
+        }
+
+        button.secondary-btn:hover {
+            background-color: #e9f3ff;
+            color: #007BFF; /* 悬停时字体颜色仍为蓝色 */
+            border-color: #0056b3; /* 仅边框颜色加深 */
+        }
+
+        /* 通用 label 样式 */
+        label {
+            font-size: 14px; /* 字体大小（示例值，可调整） */
+            font-weight: normal; /* 是否加粗：bold（加粗）或 normal（正常） */
         }
     </style>
 </head>
@@ -147,17 +196,29 @@
         <div class="card">
             <h3>Neu Zahnradtyp hinzufügen</h3>
             <form id="addForm">
-                TypBezeichnung: <input type="text" id="typbezeichnung" required><br>
-                Durchmesser: <input type="number" id="durchmesser" required><br>
-                VorgabeProduktionszeit: <input type="number" id="vorgabeproduktionszeit" required><br>
-                <button type="submit">add</button>
+                <div class="form-group">
+                    <div class="form-group">
+                        <label>TypBezeichnung:</label>
+                        <input type="text" id="typbezeichnung" required><br>
+                    </div>
+                    <label>Durchmesser: </label>
+                    <div class="form-group">
+                        <input type="number" id="durchmesser" required><br>
+                    </div>
+                    <div class="form-group">
+                        <label>VorgabeProduktionszeit: </label>
+                        <input type="number" id="vorgabeproduktionszeit" required><br>
+                    </div>
+                    <br><br>
+                    <button type="submit" class="primary-btn">ZahnradTyp hinzufügen</button>
+                </div>
             </form>
             <p id="addMessage"></p>
         </div>
         <!-- 查询齿轮按钮和显示区域 -->
         <div class="card">
-            <h3>alle Zahnräder</h3>
-            <button onclick="fetchZahnrads()">search</button>
+            <h3>Alle Zahnradtyp</h3>
+            <button onclick="fetchZahnrads()" class="primary-btn">search</button>
             <!-- <ul id="zahnradsList"></ul> -->
 
             <table border="1" id="zahnradsTable">
@@ -179,60 +240,70 @@
 
 <!-- ✅ 订单视图 -->
 <div id="auftragView" class="view">
-    <!-- 添加订单表单 -->
-    <h3>Neuen Auftrag hinzufügen</h3>
-    <form id="orderForm">
-        <div class="form-group">
-            <label for="kundeid">Kunde :</label>
-            <select id="kundeid" name="kundeid" required>
-                <option value="">Bitte Kunde auswählen</option>
-            </select>
-        </div>
 
-        <div class="form-group">
-            <label for="bestelldatum">Bestelldatum:</label>
-            <input type="date" id="bestelldatum" required>
-        </div>
-
-        <h4>Welche und wie viele Zahnräder in disem Auftrag:</h4>
-        <div id="orderItemsContainer">
-            <div class="orderItem">
+    <div class="main-section">
+        <!-- 添加订单表单 -->
+        <div class="card">
+            <h3>Neuen Auftrag hinzufügen</h3>
+            <form id="orderForm">
                 <div class="form-group">
-                    <label>ZahnradTyp:</label>
-                    <select class="zahnradtypid" required>
-                        <option value="">Bitte ZahnradTyp wählen</option>
+                    <label for="kundeid">Kunde :</label>
+                    <select id="kundeid" name="kundeid" required>
+                        <option value="">Bitte Kunde auswählen</option>
                     </select>
                 </div>
+
                 <div class="form-group">
-                    <label>Menge:</label>
-                    <input type="number" class="menge" min="1" required> <!-- 改用class -->
+                    <label for="bestelldatum">Bestelldatum:</label>
+                    <input type="date" id="bestelldatum" required>
                 </div>
-            </div>
+
+                <h4>Positionen:</h4>
+                <div id="orderItemsContainer">
+                    <div class="orderItem">
+                        <div class="form-row">
+                        <div class="form-group">
+                            <label>ZahnradTyp:</label>
+                            <select class="zahnradtypid" required>
+                                <option value="">Bitte ZahnradTyp wählen</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Menge(Stück):</label>
+                            <input type="number" class="menge" min="1" required> <!-- 改用class -->
+                        </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="secondary-btn" onclick="addOrderItem()">+ weitere Position hinzufügen</button>
+                <br><br>
+                <button type="submit" class="primary-btn">Auftrag hinzufügen</button>
+                <p id="orderMessage"></p>
+            </form>
         </div>
 
-        <button type="button" onclick="addOrderItem()">+ weiteres Zahnrad hinzufügen</button>
-        <br><br>
-        <button type="submit">Auftrag hinzufügen</button>
-        <p id="orderMessage"></p>
-    </form>
-
-    <!-- 查询订单按钮和显示区域 -->
-    <h3>alle Aufträge</h3>
-    <button onclick="fetchOrders()">search</button>
-    <table border="1" id="ordersTable">
-        <thead>
-        <tr>
-            <th>AuftragID</th>
-            <th>Kunde</th>
-            <th>Bestelldatum</th>
-            <th>Positionen</th>
-        </tr>
-        </thead>
-        <tbody id="ordersBody">
-        <!-- JS 会插入数据 -->
-        </tbody>
-    </table>
+        <!-- 查询订单按钮和显示区域 -->
+        <div class="card">
+            <h3>Alle Aufträge</h3>
+            <button onclick="fetchOrders()" class="primary-btn" >search</button>
+            <table border="1" id="ordersTable">
+                <thead>
+                <tr>
+                    <th>AuftragID</th>
+                    <th>Kunde</th>
+                    <th>Bestelldatum</th>
+                    <th>Positionen(ZahnradTyp,Menge)</th>
+                </tr>
+                </thead>
+                <tbody id="ordersBody">
+                <!-- JS 会插入数据 -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
 
 <script>
     const backendURL = "http://127.0.0.1:5000";
@@ -294,14 +365,23 @@
         const div = document.createElement("div");
         div.className = "orderItem";
         div.innerHTML = `
-                <label>Zahnrad auswählen:</label>
-                <select class="zahnradtypid" required>
-                    <option value="">Bitte ZahnradTyp wählen</option>
-                </select>
-                Menge: <input type="number" class="menge" required>
+                        <div class="form-row">
+                        <div class="form-group">
+                            <select class="zahnradtypid" required>
+                                <option value="">Bitte ZahnradTyp wählen</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" class="menge" min="1" required> <!-- 改用class -->
+                        </div>
+                        </div>
             `;
+
+        // 仅填充新创建的 select
+        const newSelect = div.querySelector(".zahnradtypid");
+        fetchZahnradTypen(newSelect); // 传入新 select 元素
         container.appendChild(div);
-        fetchZahnradTypen();  // 为新增 select 填充选项
+        // fetchZahnradTypen();  // 为新增 select 填充选项
     }
 
     // 提交订单
@@ -359,7 +439,7 @@
         const response = await fetch(`${backendURL}/kunden`);
         const kunden = await response.json();
         const select = document.getElementById("kundeid");
-        select.innerHTML = '<option value="">Bitte auswählen KundeID</option>';  // 清空并设置默认项
+        select.innerHTML = '<option value="">Bitte auswählen KundID und Name</option>';  // 清空并设置默认项
         kunden.forEach(kunde => {
             const option = document.createElement("option");
             option.value = kunde.kundeid;
@@ -372,7 +452,7 @@
     window.onload = fetchKunden;
 
     //获取齿轮的类型Id，类型名称
-    async function fetchZahnradTypen() {
+   /* async function fetchZahnradTypen() {
         const response = await fetch(`${backendURL}/zahnrads`);
         const typen = await response.json();
 
@@ -385,6 +465,31 @@
                 option.textContent = `${t.zahnradtypid} - ${t.typbezeichnung}`;
                 select.appendChild(option);
             });
+        });
+    }*/
+
+    async function fetchZahnradTypen(targetSelect) {
+        const response = await fetch(`${backendURL}/zahnrads`);
+        const typen = await response.json();
+        // 修改：如果传入了特定 select，则只填充它
+        if (targetSelect) {
+            fillSelect(targetSelect, typen);
+        } else {
+            // 默认行为：填充所有 select（仅在初始化时使用）
+            document.querySelectorAll(".zahnradtypid").forEach(select => {
+                fillSelect(select, typen);
+            });
+        }
+    }
+
+    // 提取填充逻辑到独立函数
+    function fillSelect(selectElement, typen) {
+        selectElement.innerHTML = '<option value="">Bitte ZahnradTyp wählen</option>';
+        typen.forEach(t => {
+            const option = document.createElement("option");
+            option.value = t.zahnradtypid;
+            option.textContent = `${t.zahnradtypid} - ${t.typbezeichnung}`;
+            selectElement.appendChild(option);
         });
     }
 
