@@ -23,6 +23,10 @@ def get_connection():
         port="5432"               # Port (Standard bei PostgreSQL)
     )
 ```
+## 📌 Schritt 4: Website besuchen
+Zum Schluss können Sie besuchen：http://127.0.0.1:5000/
+<img width="1275" alt="image" src="https://github.com/user-attachments/assets/b871ec30-6f3f-4cb5-adec-4d87c7edd314" />
+
 
 # 👥 Aufgabenverteilung im Projektteam
 
