@@ -22,7 +22,7 @@ def get_connection():
         host="127.0.0.1",         # Datenbankadresse (lokal)
         port="5432"               # Port (Standard bei PostgreSQL)
     )
-
+```
 
 # 👥 Aufgabenverteilung im Projektteam
 
