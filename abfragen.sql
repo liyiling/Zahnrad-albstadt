@@ -38,3 +38,22 @@ JOIN auftrag_position ap ON p.AuftragPositionID = ap.AuftragPositionID
 JOIN zahnradTyp z ON ap.ZahnradTypID = z.ZahnradTypID
 WHERE p.Ausschuss = FALSE
 GROUP BY z.TypBezeichnung;
+
+-- 6. Aufträge, die zu 100% produziert wurden (kein Ausschuss, alle Stücke gefertigt)
+SELECT a.AuftragID
+FROM auftrag a
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM auftrag_position ap
+  LEFT JOIN produktion p ON ap.AuftragPositionID = p.AuftragPositionID AND p.Ausschuss = FALSE
+  WHERE a.AuftragID = ap.AuftragID
+  GROUP BY ap.AuftragPositionID
+  HAVING COUNT(p.ProduktionID) < ap.BestellteMenge
+);
+ 
+-- 7. Maschinen, die nie Ausschuss produziert haben
+SELECT MaschineID
+FROM maschine
+WHERE MaschineID NOT IN (
+  SELECT DISTINCT MaschineID FROM produktion WHERE Ausschuss = TRUE
+);
